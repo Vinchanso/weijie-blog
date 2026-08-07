@@ -1,0 +1,74 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { t, formatDate, getReadingTime } from '../i18n';
+import { encodeTag } from '../i18n/tags';
+import type { Lang } from '../consts';
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description: string;
+  pubDate: Date;
+  updatedDate?: Date;
+  tags?: string[];
+  heroImage?: string;
+  rawBody?: string;
+}
+
+const {
+  lang,
+  title,
+  description,
+  pubDate,
+  updatedDate,
+  tags = [],
+  heroImage,
+  rawBody = '',
+} = Astro.props;
+
+const readingTime = getReadingTime(rawBody, lang);
+---
+
+<BaseLayout
+  lang={lang}
+  title={title}
+  description={description}
+  ogImage={heroImage}
+  pubDate={pubDate}
+  article={true}
+>
+  <article class="article" data-pagefind-body>
+  <header class="article__header">
+    <h1 class="article__title" data-pagefind-meta="title">{title}</h1>
+  <div class="article__meta">
+        <time datetime={pubDate.toISOString()}>{formatDate(pubDate, lang)}</time>
+        <span class="article__meta-sep">&middot;</span>
+        <span>{readingTime}</span>
+        {updatedDate && (
+          <span class="article__meta-sep">&middot;</span>
+        )}
+        {updatedDate && (
+          <span>{t(lang, 'publishedOn')}: {formatDate(updatedDate, lang)}</span>
+        )}
+      </div>
+    </header>
+
+    {heroImage && (
+      <img src={heroImage} alt={title} loading="eager" />
+    )}
+
+    <div class="prose">
+      <slot />
+    </div>
+
+    {tags.length > 0 && (
+      <div class="post-list__tags" style="margin-top: 32px;">
+        {tags.map((tag) => (
+          <a href={`/${lang}/tags/${encodeTag(tag)}`} class="post-list__tag">#{tag}</a>
+        ))}
+      </div>
+    )}
+
+    <slot name="nav" />
+  </article>
+</BaseLayout>

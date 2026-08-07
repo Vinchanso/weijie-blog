@@ -1,0 +1,44 @@
+---
+import { getCollection, render } from 'astro:content';
+import PostLayout from '../../../layouts/PostLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('zhPosts', ({ data }) => !data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+// Get prev/next posts
+const allPosts = (await getCollection('zhPosts', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+const currentIndex = allPosts.findIndex((p) => p.id === post.id);
+const prevPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
+const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
+---
+
+<PostLayout
+  lang="zh"
+  title={post.data.title}
+  description={post.data.description}
+  pubDate={post.data.pubDate}
+  updatedDate={post.data.updatedDate}
+  tags={post.data.tags}
+  heroImage={post.data.heroImage}
+  rawBody={post.body}
+>
+  <Content />
+
+  <nav slot="nav" class="article-nav">
+    {prevPost && (
+      <a href={`/zh/posts/${prevPost.id}`}>&larr; {prevPost.data.title}</a>
+    )}
+    {nextPost && (
+      <a href={`/zh/posts/${nextPost.id}`}>{nextPost.data.title} &rarr;</a>
+    )}
+  </nav>
+</PostLayout>

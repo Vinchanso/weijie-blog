@@ -1,0 +1,16 @@
+---
+import { t } from '../i18n';
+import type { Lang } from '../consts';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <p>&copy; {year} {t(lang, 'copyright')}</p>
+  <p>{t(lang, 'poweredBy')}</p>
+</footer>

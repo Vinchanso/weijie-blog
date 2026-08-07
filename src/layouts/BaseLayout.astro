@@ -1,0 +1,126 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { t } from '../i18n';
+import { SITE_URL } from '../consts';
+import type { Lang } from '../consts';
+import '../styles/global.css';
+
+interface Props {
+  lang: Lang;
+  title?: string;
+  description?: string;
+  wide?: boolean;
+  ogImage?: string;
+  pubDate?: Date;
+  article?: boolean;
+}
+
+const {
+  lang,
+  title,
+  description,
+  wide = false,
+  ogImage,
+  pubDate,
+  article = false,
+} = Astro.props;
+
+const siteTitle = t(lang, 'siteTitle');
+const siteDescription = t(lang, 'siteDescription');
+const pageTitle = title ? `${title} - ${siteTitle}` : siteTitle;
+const pageDescription = description || siteDescription;
+const currentPath = Astro.url.pathname;
+
+// Build canonical and alternate URLs
+const canonicalURL = new URL(currentPath, SITE_URL);
+const otherLang: Lang = lang === 'zh' ? 'en' : 'zh';
+const alternatePath = currentPath.replace(`/${lang}`, `/${otherLang}`);
+const alternateURL = new URL(alternatePath, SITE_URL);
+---
+
+<!doctype html>
+<html lang={lang} data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+
+    {/* Canonical and hreflang */}
+    <link rel="canonical" href={canonicalURL} />
+    <link rel="alternate" hreflang={lang} href={canonicalURL} />
+    <link rel="alternate" hreflang={otherLang} href={alternateURL} />
+    <link rel="alternate" hreflang="x-default" href={new URL('/zh/', SITE_URL)} />
+
+    {/* Open Graph */}
+    <meta property="og:title" content={title || siteTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:type" content={article ? 'article' : 'website'} />
+    <meta property="og:locale" content={lang === 'zh' ? 'zh_CN' : 'en_US'} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    {pubDate && <meta property="article:published_time" content={pubDate.toISOString()} />}
+
+    {/* Twitter Card */}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title || siteTitle} />
+    <meta name="twitter:description" content={pageDescription} />
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
+
+    {/* Fonts: Noto Serif SC, Newsreader, JetBrains Mono — all OFL 1.1 */}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    {/* RSS */}
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${siteTitle} RSS`}
+      href="/rss.xml"
+    />
+
+    {/* Favicon */}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    {/* Prevent FOUC for dark mode */}
+    <script is:inline>
+      const stored = localStorage.getItem('theme');
+      if (stored) {
+        document.documentElement.dataset.theme = stored;
+      } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.dataset.theme = 'dark';
+      }
+    </script>
+  </head>
+  <body>
+    <Header lang={lang} currentPath={currentPath} />
+    <main class={`site-main${wide ? ' site-main--wide' : ''}`}>
+      <div class={`site-main__inner${wide ? ' site-main__inner--wide' : ''}`}>
+        <slot />
+      </div>
+    </main>
+    <Footer lang={lang} />
+
+    {/* Dark mode toggle */}
+    <script is:inline>
+      function toggleTheme() {
+        const html = document.documentElement;
+        const current = html.dataset.theme || 'light';
+        const next = current === 'dark' ? 'light' : 'dark';
+        html.dataset.theme = next;
+        localStorage.setItem('theme', next);
+      }
+      document.addEventListener('keydown', (e) => {
+        if (e.key === '`' && e.ctrlKey) {
+          e.preventDefault();
+          toggleTheme();
+        }
+      });
+    </script>
+  </body>
+</html>

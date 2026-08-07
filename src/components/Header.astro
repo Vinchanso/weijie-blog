@@ -1,0 +1,37 @@
+---
+import { t } from '../i18n';
+import { getAlternateLangPath } from '../i18n';
+import Search from './Search.astro';
+import type { Lang } from '../consts';
+
+interface Props {
+  lang: Lang;
+  currentPath: string;
+}
+
+const { lang, currentPath } = Astro.props;
+const title = t(lang, 'siteTitle');
+const altLangPath = getAlternateLangPath(currentPath, lang);
+---
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <div class="site-header__title">
+      <a href={`/${lang}/`}>{title}</a>
+    </div>
+    <nav class="site-header__nav">
+      <a href={`/${lang}/`}>{t(lang, 'home')}</a>
+      <a href={`/${lang}/tags/`}>{t(lang, 'tags')}</a>
+      <a href={`/${lang}/about`}>{t(lang, 'about')}</a>
+      <Search lang={lang} />
+      <a href="/rss.xml" aria-label="RSS">RSS</a>
+      <a
+        class="site-header__lang-switch"
+        href={altLangPath}
+        aria-label={t(lang, 'langSwitchLabel')}
+      >
+        {t(lang, 'langSwitch')}
+      </a>
+    </nav>
+  </div>
+</header>

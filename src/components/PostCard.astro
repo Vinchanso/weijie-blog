@@ -1,0 +1,37 @@
+---
+import { formatDate, getReadingTime } from '../i18n';
+import { encodeTag } from '../i18n/tags';
+import type { Lang } from '../consts';
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description: string;
+  pubDate: Date;
+  tags?: string[];
+  slug: string;
+  rawBody?: string;
+}
+
+const { lang, title, description, pubDate, tags = [], slug, rawBody = '' } = Astro.props;
+const readingTime = getReadingTime(rawBody, lang);
+---
+
+<li class="post-list__item">
+  <h2 class="post-list__title">
+    <a href={`/${lang}/posts/${slug}`}>{title}</a>
+  </h2>
+  <div class="post-list__meta">
+    <time datetime={pubDate.toISOString()}>{formatDate(pubDate, lang)}</time>
+    <span class="article__meta-sep">&middot;</span>
+    <span>{readingTime}</span>
+  </div>
+  <p class="post-list__description">{description}</p>
+  {tags.length > 0 && (
+    <div class="post-list__tags">
+      {tags.map((tag) => (
+        <a href={`/${lang}/tags/${encodeTag(tag)}`} class="post-list__tag">#{tag}</a>
+      ))}
+    </div>
+  )}
+</li>

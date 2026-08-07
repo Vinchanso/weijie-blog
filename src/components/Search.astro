@@ -1,0 +1,272 @@
+---
+import type { Lang } from '../consts';
+import { t } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const placeholder = t(lang, 'searchPlaceholder');
+const noResults = t(lang, 'noResults');
+---
+
+<div class="search-trigger">
+  <button id="search-open" class="search-trigger__btn" aria-label={t(lang, 'search')}>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/>
+      <path d="m21 21-4.35-4.35"/>
+    </svg>
+  </button>
+</div>
+
+<div id="search-overlay" class="search-overlay" hidden>
+  <div class="search-overlay__backdrop"></div>
+  <div class="search-overlay__panel">
+    <input
+      id="search-input"
+      class="search-overlay__input"
+      type="text"
+      placeholder={placeholder}
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <button id="search-close" class="search-overlay__close" aria-label="Close">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 6 6 18M6 6l12 12"/>
+      </svg>
+    </button>
+    <div id="search-results" class="search-overlay__results"></div>
+  </div>
+</div>
+
+<style>
+.search-trigger__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  font-family: var(--font-serif);
+  padding: 4px 2px;
+  transition: color var(--transition-fast);
+}
+/* Increase tap target on mobile */
+@media (max-width: 640px) {
+  .search-trigger__btn {
+    padding: 8px 4px;
+  }
+}
+
+.search-trigger__btn:hover {
+  color: var(--color-text);
+}
+
+.search-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 15vh;
+}
+
+.search-overlay[hidden] {
+  display: none;
+}
+
+.search-overlay__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+}
+
+.search-overlay__panel {
+  position: relative;
+  width: 90%;
+  max-width: 640px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.search-overlay__input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  padding: 20px 56px 20px 24px;
+  font-size: 18px;
+  font-family: var(--font-serif);
+  background: var(--color-bg);
+  color: var(--color-text);
+  outline: none;
+}
+
+.search-overlay__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color var(--transition-fast);
+}
+
+.search-overlay__close:hover {
+  color: var(--color-text);
+}
+
+.search-overlay__results {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.search-overlay__results:empty::after {
+  content: attr(data-hint);
+  display: block;
+  padding: 24px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
+}
+
+.search-result {
+  display: block;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--color-border);
+  text-decoration: none;
+  transition: background var(--transition-fast);
+}
+
+.search-result:hover {
+  background: var(--color-code-bg);
+}
+
+.search-result__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+
+.search-result__excerpt {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.search-result mark {
+  background: rgba(139, 111, 71, 0.15);
+  color: var(--color-accent);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+@media (max-width: 640px) {
+  .search-overlay {
+    padding-top: 10vh;
+  }
+  .search-overlay__panel {
+    width: 95%;
+  }
+}
+</style>
+
+<script>
+  const overlay = document.getElementById('search-overlay');
+  const input = document.getElementById('search-input') as HTMLInputElement;
+  const results = document.getElementById('search-results')!;
+  const openBtn = document.getElementById('search-open')!;
+  const closeBtn = document.getElementById('search-close')!;
+
+  let pagefind: any = null;
+  const noResultsText = results.getAttribute('data-hint') || 'No results';
+
+  async function loadPagefind() {
+    if (!pagefind) {
+      try {
+        const pfUrl = '/pagefind/pagefind.js';
+        pagefind = await import(/* @vite-ignore */ pfUrl);
+        await pagefind.init();
+      } catch {
+        results.innerHTML = `<p style="padding:24px;text-align:center;color:var(--color-text-muted);font-size:14px;">Search index not built yet. Run <code>npm run build</code> first.</p>`;
+        return false;
+      }
+    }
+    return true;
+  }
+
+  async function doSearch(query: string) {
+    if (!query.trim()) {
+      results.innerHTML = '';
+      return;
+    }
+
+    const ok = await loadPagefind();
+    if (!ok) return;
+
+    const search = await pagefind.search(query);
+
+    if (search.results.length === 0) {
+      results.innerHTML = `<p style="padding:24px;text-align:center;color:var(--color-text-muted);font-size:14px;">${noResultsText}</p>`;
+      return;
+    }
+
+    const topResults = search.results.slice(0, 10);
+    const data = await Promise.all(topResults.map((r: any) => r.data()));
+
+    results.innerHTML = data
+      .map((r: any) => {
+        const excerpt = r.excerpt
+          ? `<div class="search-result__excerpt">${r.excerpt}</div>`
+          : '';
+        return `<a href="${r.url}" class="search-result">
+          <div class="search-result__title">${r.meta?.title || r.url}</div>
+          ${excerpt}
+        </a>`;
+      })
+      .join('');
+  }
+
+  function openSearch() {
+    overlay!.removeAttribute('hidden');
+    input.value = '';
+    results.innerHTML = '';
+    results.setAttribute('data-hint', noResultsText);
+    setTimeout(() => input.focus(), 50);
+  }
+
+  function closeSearch() {
+    overlay!.setAttribute('hidden', '');
+  }
+
+  openBtn.addEventListener('click', openSearch);
+  closeBtn.addEventListener('click', closeSearch);
+
+  overlay!.querySelector('.search-overlay__backdrop')!.addEventListener('click', closeSearch);
+
+  let debounce: ReturnType<typeof setTimeout>;
+  input.addEventListener('input', () => {
+    clearTimeout(debounce);
+    debounce = setTimeout(() => doSearch(input.value), 200);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSearch();
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      openSearch();
+    }
+  });
+</script>
