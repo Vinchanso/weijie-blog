@@ -88,3 +88,28 @@
 - 文章详情页渲染正常（H2/表格/代码块/引用块全部正确）
 - Pagefind 索引: 7 页面, 1113 词
 - 生产构建通过
+
+## 部署上线完成 (2026-08-07)
+
+### 部署结果
+- GitHub 仓库: https://github.com/Vinchanso/weijie-blog
+- Vercel 项目: vinc5/blog
+- 线上地址: https://blog-ochre-six-20.vercel.app
+- GitHub ↔ Vercel 自动部署: 已关联
+
+### 线上验证
+- [x] 根路径: 正常返回
+- [x] 中文首页: 4 篇文章正确显示
+- [x] 文章详情页: Codex DeepSeek 教程渲染正常
+- [x] 英文首页: 语言标识和内容正确
+- [x] RSS: 7 篇文章全部包含
+- [x] Sitemap: 正确生成
+- [x] hreflang: 中英文互链正确
+- [x] 标签页: 可正常访问
+- [x] 构建时间: <1 秒（Vercel 缓存加速）
+
+### 部署前 review
+- [x] 密钥扫描: 无泄露
+- [x] .env 检查: 无敏感文件
+- [x] 构建验证: 31 页面通过
+- [x] Git 工作区: 干净
