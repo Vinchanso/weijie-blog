@@ -1,6 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import { t, formatDate, getReadingTime } from '../i18n';
+import Comments from '../components/Comments.astro';
 import { encodeTag } from '../i18n/tags';
 import type { Lang } from '../consts';
 
@@ -70,5 +71,7 @@ const readingTime = getReadingTime(rawBody, lang);
     )}
 
     <slot name="nav" />
+
+    <Comments lang={lang} />
   </article>
 </BaseLayout>
