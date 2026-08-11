@@ -52,6 +52,12 @@ const hasToc = tocHeadings.length > 1;
   wide={hasToc}
 >
   <div class:list={['post-layout', { 'post-layout--with-toc': hasToc }]}>
+    {hasToc && (
+      <aside class="post-layout__sidebar">
+        <TableOfContents headings={headings} />
+      </aside>
+    )}
+
     <article class="article" data-pagefind-body>
       <header class="article__header">
         <h1 class="article__title" data-pagefind-meta="title">{title}</h1>
@@ -88,12 +94,6 @@ const hasToc = tocHeadings.length > 1;
 
       <Comments lang={lang} />
     </article>
-
-    {hasToc && (
-      <aside class="post-layout__sidebar">
-        <TableOfContents headings={headings} />
-      </aside>
-    )}
   </div>
 
   <CodeBlockEnhance />
@@ -108,13 +108,16 @@ const hasToc = tocHeadings.length > 1;
 .post-layout--with-toc {
   max-width: 960px;
   display: grid;
-  grid-template-columns: 1fr 200px;
+  grid-template-columns: 200px 1fr;
   gap: 48px;
   align-items: start;
 }
 
 .post-layout__sidebar {
-  padding-top: 60px;
+  position: sticky;
+  top: 80px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
 }
 
 @media (max-width: 1024px) {
