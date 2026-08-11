@@ -6,7 +6,7 @@ import sentryAstro from '@sentry/astro';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://weijie.blog',
+  site: 'https://blog-ochre-six-20.vercel.app',
   integrations: [
     sitemap(),
     sentryAstro(),
