@@ -4,16 +4,18 @@ import PostLayout from '../../../layouts/PostLayout.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('enPosts', ({ data }) => !data.draft);
+  const zhPosts = await getCollection('zhPosts', ({ data }) => !data.draft);
+  const zhSlugs = new Set(zhPosts.map((p) => p.id));
+
   return posts.map((post) => ({
     params: { slug: post.id },
-    props: { post },
+    props: { post, alternateExists: zhSlugs.has(post.id) },
   }));
 }
 
-const { post } = Astro.props;
+const { post, alternateExists } = Astro.props;
 const { Content, headings } = await render(post);
 
-// Get prev/next posts
 const allPosts = (await getCollection('enPosts', ({ data }) => !data.draft))
   .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
 const currentIndex = allPosts.findIndex((p) => p.id === post.id);
@@ -31,6 +33,7 @@ const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1]
   heroImage={post.data.heroImage}
   rawBody={post.body}
   headings={headings}
+  alternateExists={alternateExists}
 >
   <Content />
 

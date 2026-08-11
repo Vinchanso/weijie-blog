@@ -9,7 +9,6 @@ export function t(lang: Lang, key: TranslationKey): string {
 // Get the alternate language path for a given path
 export function getAlternateLangPath(path: string, currentLang: Lang): string {
   const otherLang: Lang = currentLang === 'zh' ? 'en' : 'zh';
-  // Extract the path without language prefix
   const pathWithoutLang = path.replace(/^\/(zh|en)/, '');
   return `/${otherLang}${pathWithoutLang || ''}`;
 }
@@ -34,8 +33,20 @@ export function formatDate(date: Date, lang: Lang): string {
 
 // Estimate reading time from content
 export function getReadingTime(content: string, lang: Lang): string {
-  // Rough estimate: ~300 chars/min for Chinese, ~200 words/min for English
   const chars = content.length;
   const minutes = Math.max(1, Math.ceil(chars / 500));
   return `${minutes} ${lang === 'zh' ? '分钟阅读' : 'min read'}`;
+}
+
+// Check if a slug exists in both language collections
+import { getEntry } from 'astro:content';
+
+export async function postExistsInLang(slug: string, lang: Lang): Promise<boolean> {
+  try {
+    const collection = lang === 'zh' ? 'zhPosts' : 'enPosts';
+    const entry = await getEntry(collection, slug);
+    return !!entry && !entry.data.draft;
+  } catch {
+    return false;
+  }
 }

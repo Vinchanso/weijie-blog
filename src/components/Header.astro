@@ -7,11 +7,17 @@ import type { Lang } from '../consts';
 interface Props {
   lang: Lang;
   currentPath: string;
+  alternateExists?: boolean;
 }
 
-const { lang, currentPath } = Astro.props;
+const { lang, currentPath, alternateExists = true } = Astro.props;
 const title = t(lang, 'siteTitle');
-const altLangPath = getAlternateLangPath(currentPath, lang);
+const otherLang: Lang = lang === 'zh' ? 'en' : 'zh';
+
+// 如果当前文章没有另一种语言版本，切换按钮指向对应语言首页
+const altLangPath = alternateExists
+  ? getAlternateLangPath(currentPath, lang)
+  : `/${otherLang}/`;
 ---
 
 <header class="site-header">

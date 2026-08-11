@@ -14,6 +14,7 @@ interface Props {
   ogImage?: string;
   pubDate?: Date;
   article?: boolean;
+  alternateExists?: boolean;
 }
 
 const {
@@ -24,6 +25,7 @@ const {
   ogImage,
   pubDate,
   article = false,
+  alternateExists = true,
 } = Astro.props;
 
 const siteTitle = t(lang, 'siteTitle');
@@ -32,7 +34,6 @@ const pageTitle = title ? `${title} - ${siteTitle}` : siteTitle;
 const pageDescription = description || siteDescription;
 const currentPath = Astro.url.pathname;
 
-// Build canonical and alternate URLs
 const canonicalURL = new URL(currentPath, SITE_URL);
 const otherLang: Lang = lang === 'zh' ? 'en' : 'zh';
 const alternatePath = currentPath.replace(`/${lang}`, `/${otherLang}`);
@@ -49,8 +50,8 @@ const alternateURL = new URL(alternatePath, SITE_URL);
 
     {/* Canonical and hreflang */}
     <link rel="canonical" href={canonicalURL} />
-    <link rel="alternate" hreflang={lang} href={canonicalURL} />
-    <link rel="alternate" hreflang={otherLang} href={alternateURL} />
+    {alternateExists && <link rel="alternate" hreflang={lang} href={canonicalURL} />}
+    {alternateExists && <link rel="alternate" hreflang={otherLang} href={alternateURL} />}
     <link rel="alternate" hreflang="x-default" href={new URL('/zh/', SITE_URL)} />
 
     {/* Open Graph */}
@@ -68,7 +69,7 @@ const alternateURL = new URL(alternatePath, SITE_URL);
     <meta name="twitter:description" content={pageDescription} />
     {ogImage && <meta name="twitter:image" content={ogImage} />}
 
-    {/* Fonts: Noto Serif SC, Newsreader, JetBrains Mono — all OFL 1.1 */}
+    {/* Fonts */}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -84,10 +85,8 @@ const alternateURL = new URL(alternatePath, SITE_URL);
       href="/rss.xml"
     />
 
-    {/* Favicon */}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-    {/* Prevent FOUC for dark mode */}
     <script is:inline>
       const stored = localStorage.getItem('theme');
       if (stored) {
@@ -98,7 +97,7 @@ const alternateURL = new URL(alternatePath, SITE_URL);
     </script>
   </head>
   <body>
-    <Header lang={lang} currentPath={currentPath} />
+    <Header lang={lang} currentPath={currentPath} alternateExists={alternateExists} />
     <main class={`site-main${wide ? ' site-main--wide' : ''}`}>
       <div class={`site-main__inner${wide ? ' site-main__inner--wide' : ''}`}>
         <slot />
@@ -106,7 +105,6 @@ const alternateURL = new URL(alternatePath, SITE_URL);
     </main>
     <Footer lang={lang} />
 
-    {/* Dark mode toggle */}
     <script is:inline>
       function toggleTheme() {
         const html = document.documentElement;

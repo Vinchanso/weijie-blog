@@ -23,6 +23,7 @@ interface Props {
   heroImage?: string;
   rawBody?: string;
   headings?: Heading[];
+  alternateExists?: boolean;
 }
 
 const {
@@ -35,6 +36,7 @@ const {
   heroImage,
   rawBody = '',
   headings = [],
+  alternateExists = false,
 } = Astro.props;
 
 const readingTime = getReadingTime(rawBody, lang);
@@ -50,6 +52,7 @@ const hasToc = tocHeadings.length > 1;
   pubDate={pubDate}
   article={true}
   wide={hasToc}
+  alternateExists={alternateExists}
 >
   <div class:list={['post-layout', { 'post-layout--with-toc': hasToc }]}>
     {hasToc && (
