@@ -1,0 +1,144 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+// 只取 h2 和 h3
+const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+{tocHeadings.length > 1 && (
+  <nav class="toc" aria-label="目录">
+    <p class="toc__title">目录</p>
+    <ul class="toc__list">
+      {tocHeadings.map((heading) => (
+        <li class={`toc__item toc__item--${heading.depth}`}>
+          <a href={`#${heading.slug}`} class="toc__link" data-toc-slug={heading.slug}>
+            {heading.text}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}
+
+<script>
+  // Scroll spy: 高亮当前阅读到的章节
+  function initScrollSpy() {
+    const tocLinks = document.querySelectorAll<HTMLElement>('.toc__link');
+    const headings = document.querySelectorAll<HTMLElement>('.prose h2, .prose h3');
+
+    if (tocLinks.length === 0 || headings.length === 0) return;
+
+    const linkMap = new Map<string, HTMLElement>();
+    tocLinks.forEach((link) => {
+      const slug = link.dataset.tocSlug;
+      if (slug) linkMap.set(slug, link);
+    });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const slug = entry.target.id;
+          const link = linkMap.get(slug);
+          if (!link) return;
+
+          if (entry.isIntersecting) {
+            tocLinks.forEach((l) => l.classList.remove('toc__link--active'));
+            link.classList.add('toc__link--active');
+          }
+        });
+      },
+      {
+        rootMargin: '-80px 0px -70% 0px',
+        threshold: 0,
+      }
+    );
+
+    headings.forEach((heading) => observer.observe(heading));
+  }
+
+  if (document.readyState !== 'loading') {
+    initScrollSpy();
+  } else {
+    document.addEventListener('DOMContentLoaded', initScrollSpy);
+  }
+</script>
+
+<style>
+.toc {
+  position: sticky;
+  top: 40px;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.toc__title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  font-family: var(--font-serif);
+}
+
+.toc__list {
+  list-style: none;
+  border-left: 2px solid var(--color-border);
+  padding-left: 0;
+}
+
+.toc__item {
+  padding-left: 16px;
+  position: relative;
+}
+
+.toc__item--3 {
+  padding-left: 28px;
+}
+
+.toc__link {
+  display: block;
+  color: var(--color-text-muted);
+  border-bottom: none;
+  padding: 3px 0;
+  font-size: 13px;
+  line-height: 1.5;
+  transition: color var(--transition-fast);
+}
+
+.toc__link:hover {
+  color: var(--color-text);
+}
+
+.toc__link--active {
+  color: var(--color-accent);
+  font-weight: 500;
+}
+
+.toc__item:has(.toc__link--active)::before {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--color-accent);
+}
+
+@media (max-width: 1024px) {
+  .toc {
+    display: none;
+  }
+}
+</style>

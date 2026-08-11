@@ -1,9 +1,17 @@
 ---
 import BaseLayout from './BaseLayout.astro';
-import { t, formatDate, getReadingTime } from '../i18n';
 import Comments from '../components/Comments.astro';
+import CodeBlockEnhance from '../components/CodeBlockEnhance.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+import { t, formatDate, getReadingTime } from '../i18n';
 import { encodeTag } from '../i18n/tags';
 import type { Lang } from '../consts';
+
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
 
 interface Props {
   lang: Lang;
@@ -14,6 +22,7 @@ interface Props {
   tags?: string[];
   heroImage?: string;
   rawBody?: string;
+  headings?: Heading[];
 }
 
 const {
@@ -25,9 +34,12 @@ const {
   tags = [],
   heroImage,
   rawBody = '',
+  headings = [],
 } = Astro.props;
 
 const readingTime = getReadingTime(rawBody, lang);
+const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const hasToc = tocHeadings.length > 1;
 ---
 
 <BaseLayout
@@ -37,41 +49,82 @@ const readingTime = getReadingTime(rawBody, lang);
   ogImage={heroImage}
   pubDate={pubDate}
   article={true}
+  wide={hasToc}
 >
-  <article class="article" data-pagefind-body>
-  <header class="article__header">
-    <h1 class="article__title" data-pagefind-meta="title">{title}</h1>
-  <div class="article__meta">
-        <time datetime={pubDate.toISOString()}>{formatDate(pubDate, lang)}</time>
-        <span class="article__meta-sep">&middot;</span>
-        <span>{readingTime}</span>
-        {updatedDate && (
+  <div class:list={['post-layout', { 'post-layout--with-toc': hasToc }]}>
+    <article class="article" data-pagefind-body>
+      <header class="article__header">
+        <h1 class="article__title" data-pagefind-meta="title">{title}</h1>
+        <div class="article__meta">
+          <time datetime={pubDate.toISOString()}>{formatDate(pubDate, lang)}</time>
           <span class="article__meta-sep">&middot;</span>
-        )}
-        {updatedDate && (
-          <span>{t(lang, 'publishedOn')}: {formatDate(updatedDate, lang)}</span>
-        )}
+          <span>{readingTime}</span>
+          {updatedDate && (
+            <>
+              <span class="article__meta-sep">&middot;</span>
+              <span>{t(lang, 'publishedOn')}: {formatDate(updatedDate, lang)}</span>
+            </>
+          )}
+        </div>
+      </header>
+
+      {heroImage && (
+        <img src={heroImage} alt={title} loading="eager" />
+      )}
+
+      <div class="prose">
+        <slot />
       </div>
-    </header>
 
-    {heroImage && (
-      <img src={heroImage} alt={title} loading="eager" />
+      {tags.length > 0 && (
+        <div class="post-list__tags" style="margin-top: 32px;">
+          {tags.map((tag) => (
+            <a href={`/${lang}/tags/${encodeTag(tag)}`} class="post-list__tag">#{tag}</a>
+          ))}
+        </div>
+      )}
+
+      <slot name="nav" />
+
+      <Comments lang={lang} />
+    </article>
+
+    {hasToc && (
+      <aside class="post-layout__sidebar">
+        <TableOfContents headings={headings} />
+      </aside>
     )}
+  </div>
 
-    <div class="prose">
-      <slot />
-    </div>
-
-    {tags.length > 0 && (
-      <div class="post-list__tags" style="margin-top: 32px;">
-        {tags.map((tag) => (
-          <a href={`/${lang}/tags/${encodeTag(tag)}`} class="post-list__tag">#{tag}</a>
-        ))}
-      </div>
-    )}
-
-    <slot name="nav" />
-
-    <Comments lang={lang} />
-  </article>
+  <CodeBlockEnhance />
 </BaseLayout>
+
+<style>
+.post-layout {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.post-layout--with-toc {
+  max-width: 960px;
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  gap: 48px;
+  align-items: start;
+}
+
+.post-layout__sidebar {
+  padding-top: 60px;
+}
+
+@media (max-width: 1024px) {
+  .post-layout--with-toc {
+    max-width: var(--max-width);
+    grid-template-columns: 1fr;
+  }
+
+  .post-layout__sidebar {
+    display: none;
+  }
+}
+</style>

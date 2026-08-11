@@ -1,0 +1,138 @@
+---
+// 代码块增强：复制按钮 + 语言标签
+---
+
+<script>
+  function enhanceCodeBlocks() {
+    const codeBlocks = document.querySelectorAll('.prose pre');
+
+    codeBlocks.forEach((pre) => {
+      if (pre.parentElement?.classList.contains('code-block-wrapper')) return;
+
+      const code = pre.querySelector('code');
+      if (!code) return;
+
+      // 提取语言：优先 data-language 属性（Astro 7 Shiki），其次 class 匹配
+      let lang = '';
+      const langAttr = pre.getAttribute('data-language');
+      if (langAttr && langAttr !== 'plaintext' && langAttr !== 'text') {
+        lang = langAttr;
+      } else {
+        const langClass = code.className.match(/language-([\w-]+)/);
+        if (langClass) lang = langClass[1];
+      }
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'code-block-wrapper';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      const toolbar = document.createElement('div');
+      toolbar.className = 'code-block__toolbar';
+
+      if (lang) {
+        const langLabel = document.createElement('span');
+        langLabel.className = 'code-block__lang';
+        langLabel.textContent = lang;
+        toolbar.appendChild(langLabel);
+      } else {
+        toolbar.appendChild(document.createElement('span'));
+      }
+
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'code-block__copy';
+      copyBtn.setAttribute('aria-label', '复制代码');
+      copyBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span class="code-block__copy-text">复制</span>`;
+      copyBtn.addEventListener('click', async () => {
+        const text = code.textContent || '';
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch {
+          const range = document.createRange();
+          range.selectNodeContents(code);
+          const sel = window.getSelection();
+          sel?.removeAllRanges();
+          sel?.addRange(range);
+          document.execCommand('copy');
+          sel?.removeAllRanges();
+        }
+        copyBtn.classList.add('code-block__copy--done');
+        const textEl = copyBtn.querySelector('.code-block__copy-text');
+        if (textEl) textEl.textContent = '已复制';
+        setTimeout(() => {
+          copyBtn.classList.remove('code-block__copy--done');
+          if (textEl) textEl.textContent = '复制';
+        }, 2000);
+      });
+
+      toolbar.appendChild(copyBtn);
+      wrapper.insertBefore(toolbar, pre);
+    });
+  }
+
+  if (document.readyState !== 'loading') {
+    enhanceCodeBlocks();
+  } else {
+    document.addEventListener('DOMContentLoaded', enhanceCodeBlocks);
+  }
+</script>
+
+<style is:global>
+.code-block-wrapper {
+  position: relative;
+  margin: 1.6em 0;
+}
+
+.code-block__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 16px;
+  background-color: var(--color-code-bg);
+  border: 1px solid var(--color-border);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.code-block-wrapper pre {
+  margin: 0 !important;
+  border-radius: 0 0 6px 6px !important;
+  border-top: 1px solid var(--color-border) !important;
+}
+
+.code-block__lang {
+  color: var(--color-text-muted);
+  text-transform: lowercase;
+  letter-spacing: 0.03em;
+}
+
+.code-block__copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.code-block__copy:hover {
+  color: var(--color-text);
+  background: var(--color-border);
+}
+
+.code-block__copy--done {
+  color: var(--color-accent);
+}
+
+.code-block__copy-text {
+  font-size: 12px;
+}
+</style>
