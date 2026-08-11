@@ -1,0 +1,1 @@
+<svg width="800" height="400" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="400" fill="#f6f6f6"/><text x="400" y="180" font-size="32" text-anchor="middle" fill="#8b6f47" font-family="serif">博客图片演示</text><text x="400" y="230" font-size="18" text-anchor="middle" fill="#999">800 x 400px - 这是放在 public/images/ 下的图片</text></svg>
