@@ -76,7 +76,7 @@ git commit -m "new post: how to publish"
 git push
 ```
 
-Wait 30 seconds, then visit `https://blog-ochre-six-20.vercel.app/zh/` to see it.
+Wait 30 seconds, then visit `https://vijaylab-blog.vercel.app/zh/` to see it.
 
 ## Image Guidelines
 

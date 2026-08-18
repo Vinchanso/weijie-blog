@@ -78,7 +78,7 @@ git commit -m "新文章：怎么发布一篇文章"
 git push
 ```
 
-等 30 秒，打开 `https://blog-ochre-six-20.vercel.app/zh/` 就能看到。
+等 30 秒，打开 `https://vijaylab-blog.vercel.app/zh/` 就能看到。
 
 ## 图片规格建议
 

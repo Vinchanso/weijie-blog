@@ -8,7 +8,7 @@ interface Props {
 const { lang } = Astro.props;
 
 // Giscus config — these values come from https://giscus.app after setup
-const repo = 'Vinchanso/weijie-blog';
+const repo = 'VijayLam/vijaylab-blog';
 const repoId = 'R_kgDOTw0Mww'; // verified via GitHub GraphQL API
 const category = 'Announcements';
 const categoryId = 'DIC_kwDOTw0Mw84DC2R0'; // verified
@@ -34,7 +34,7 @@ const isZh = lang === 'zh';
 
     const script = document.createElement('script');
     script.src = 'https://giscus.app/client.js';
-    script.setAttribute('data-repo', 'Vinchanso/weijie-blog');
+    script.setAttribute('data-repo', 'VijayLam/vijaylab-blog');
     script.setAttribute('data-repo-id', 'R_kgDOTw0Mww');
     script.setAttribute('data-category', 'Announcements');
     script.setAttribute('data-category-id', 'DIC_kwDOTw0Mw84DC2R0');

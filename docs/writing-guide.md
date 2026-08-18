@@ -127,7 +127,7 @@ const x: number = 1;
 ## 发完文章怎么确认
 
 1. 等 30 秒（Vercel 自动构建部署）
-2. 打开 https://blog-ochre-six-20.vercel.app/zh/
+2. 打开 https://vijaylab-blog.vercel.app/zh/
 3. 首页应该出现你的新文章
 4. 点进去确认排版正常
 

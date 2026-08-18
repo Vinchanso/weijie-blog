@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://weijie.blog/sitemap-index.xml
+Sitemap: https://vijaylab-blog.vercel.app/sitemap-index.xml

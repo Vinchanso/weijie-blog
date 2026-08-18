@@ -92,9 +92,9 @@
 ## 部署上线完成 (2026-08-07)
 
 ### 部署结果
-- GitHub 仓库: https://github.com/Vinchanso/weijie-blog
-- Vercel 项目: vinc5/blog
-- 线上地址: https://blog-ochre-six-20.vercel.app
+- GitHub 仓库: https://github.com/VijayLam/vijaylab-blog
+- Vercel 项目: vinc5/vijaylab-blog
+- 线上地址: https://vijaylab-blog.vercel.app
 - GitHub ↔ Vercel 自动部署: 已关联
 
 ### 线上验证

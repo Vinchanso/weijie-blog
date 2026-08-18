@@ -4,7 +4,7 @@ export const SITE_TITLE = '维杰';
 export const SITE_TITLE_EN = 'Vijay';
 export const SITE_DESCRIPTION = '关于 AI、技术与开发的深度思考';
 export const SITE_DESCRIPTION_EN = 'Deep thoughts on AI, technology, and development';
-export const SITE_URL = 'https://blog-ochre-six-20.vercel.app';
+export const SITE_URL = 'https://vijaylab-blog.vercel.app';
 export const AUTHOR = '维杰';
 
 export const LANGUAGES = {
